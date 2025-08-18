@@ -1,10 +1,23 @@
+import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
+import SplashScreen from './src/screens/SplashScreen';
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
+  if (showSplash) {
+    return (
+      <>
+        <SplashScreen onFinish={() => setShowSplash(false)} />
+        <StatusBar style="light" />
+      </>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
+      <Text>ByteBank - App Principal</Text>
       <StatusBar style="auto" />
     </View>
   );

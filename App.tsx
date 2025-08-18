@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import SplashScreen from './src/screens/SplashScreen';
+import DashboardScreen from './src/screens/Dashboard/DashboardScreen';
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -16,10 +17,10 @@ export default function App() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text>ByteBank - App Principal</Text>
-      <StatusBar style="auto" />
-    </View>
+    <>
+      <DashboardScreen />
+      <StatusBar style="light" />
+    </>
   );
 }
 

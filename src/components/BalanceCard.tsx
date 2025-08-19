@@ -1,14 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../constants/colors';
 
-interface BalanceCardProps {
-  fadeAnim: Animated.Value;
-  slideAnim: Animated.Value;
-}
-
-export default function BalanceCard({ fadeAnim, slideAnim }: BalanceCardProps) {
+export default function BalanceCard() {
   const [isBalanceVisible, setIsBalanceVisible] = useState(true);
 
   const getCurrentDate = () => {
@@ -22,10 +17,7 @@ export default function BalanceCard({ fadeAnim, slideAnim }: BalanceCardProps) {
   };
 
   return (
-    <Animated.View style={[
-      styles.balanceCard,
-      { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }
-    ]}>
+    <View style={styles.balanceCard}>
       <Text style={styles.greeting}>Olá, Joana! :)</Text>
       <Text style={styles.date}>{getCurrentDate()}</Text>
       
@@ -45,7 +37,7 @@ export default function BalanceCard({ fadeAnim, slideAnim }: BalanceCardProps) {
           {isBalanceVisible ? "R$ 2.500,00" : "R$ ••••••"}
         </Text>
       </View>
-    </Animated.View>
+    </View>
   );
 }
 

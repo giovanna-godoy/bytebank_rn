@@ -17,23 +17,55 @@ type DashboardScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Da
 
 export default function DashboardScreen() {
   const navigation = useNavigation<DashboardScreenNavigationProp>();
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(50)).current;
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showSideMenu, setShowSideMenu] = useState(false);
+  
+  const balanceAnim = useRef(new Animated.Value(0)).current;
+  const investmentAnim = useRef(new Animated.Value(0)).current;
+  const statsAnim = useRef(new Animated.Value(0)).current;
+  
+  const balanceSlide = useRef(new Animated.Value(50)).current;
+  const investmentSlide = useRef(new Animated.Value(50)).current;
+  const statsSlide = useRef(new Animated.Value(50)).current;
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 600,
-        useNativeDriver: true,
-      }),
+    Animated.stagger(200, [
+      Animated.parallel([
+        Animated.timing(balanceAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        Animated.timing(balanceSlide, {
+          toValue: 0,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.parallel([
+        Animated.timing(investmentAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        Animated.timing(investmentSlide, {
+          toValue: 0,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.parallel([
+        Animated.timing(statsAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        Animated.timing(statsSlide, {
+          toValue: 0,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+      ]),
     ]).start();
   }, []);
 
@@ -59,9 +91,26 @@ export default function DashboardScreen() {
       />
       
       <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <BalanceCard fadeAnim={fadeAnim} slideAnim={slideAnim} />
-        <InvestmentCard fadeAnim={fadeAnim} slideAnim={slideAnim} />
-        <StatsCard fadeAnim={fadeAnim} slideAnim={slideAnim} />
+        <Animated.View style={{
+          opacity: balanceAnim,
+          transform: [{ translateY: balanceSlide }]
+        }}>
+          <BalanceCard />
+        </Animated.View>
+        
+        <Animated.View style={{
+          opacity: investmentAnim,
+          transform: [{ translateY: investmentSlide }]
+        }}>
+          <InvestmentCard />
+        </Animated.View>
+        
+        <Animated.View style={{
+          opacity: statsAnim,
+          transform: [{ translateY: statsSlide }]
+        }}>
+          <StatsCard />
+        </Animated.View>
       </ScrollView>
     </View>
   );

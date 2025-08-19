@@ -1,18 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { colors } from '../constants/colors';
 
-interface InvestmentCardProps {
-  fadeAnim: Animated.Value;
-  slideAnim: Animated.Value;
-}
-
-export default function InvestmentCard({ fadeAnim, slideAnim }: InvestmentCardProps) {
+export default function InvestmentCard() {
   return (
-    <Animated.View style={[
-      styles.investmentCard,
-      { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }
-    ]}>
+    <View style={styles.investmentCard}>
       <Text style={styles.sectionTitle}>Investimentos</Text>
       <Text style={styles.investmentTotal}>Total: R$ 50.000,00</Text>
       
@@ -26,7 +18,7 @@ export default function InvestmentCard({ fadeAnim, slideAnim }: InvestmentCardPr
           <Text style={styles.investmentValue}>R$ 14.000,00</Text>
         </View>
       </View>
-    </Animated.View>
+    </View>
   );
 }
 

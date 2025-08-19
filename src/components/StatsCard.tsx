@@ -1,25 +1,47 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { colors } from '../constants/colors';
 
-interface StatsCardProps {
-  fadeAnim: Animated.Value;
-  slideAnim: Animated.Value;
-}
+export default function StatsCard() {
+  const rotateAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0)).current;
 
-export default function StatsCard({ fadeAnim, slideAnim }: StatsCardProps) {
+  useEffect(() => {
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.timing(rotateAnim, {
+        toValue: 1,
+        duration: 1500,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
+  const spin = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
   return (
-    <Animated.View style={[
-      styles.statsCard,
-      { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }
-    ]}>
+    <View style={styles.statsCard}>
       <Text style={styles.sectionTitle}>Estatísticas</Text>
       
       <View style={styles.chartContainer}>
-        <View style={styles.donutChart}>
+        <Animated.View style={[
+          styles.donutChart,
+          {
+            transform: [
+              { scale: scaleAnim },
+              { rotate: spin }
+            ]
+          }
+        ]}>
           <View style={styles.chartCenter}>
           </View>
-        </View>
+        </Animated.View>
         <View style={styles.legend}>
           <View style={styles.legendItem}>
             <View style={[styles.legendColor, { backgroundColor: colors.chart.blue }]} />
@@ -39,7 +61,7 @@ export default function StatsCard({ fadeAnim, slideAnim }: StatsCardProps) {
           </View>
         </View>
       </View>
-    </Animated.View>
+    </View>
   );
 }
 

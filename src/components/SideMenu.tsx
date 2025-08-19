@@ -14,7 +14,7 @@ export default function SideMenu({ visible, onClose, onNavigate }: SideMenuProps
 
   const menuItems = [
     { title: 'Início', icon: 'home-outline', screen: 'Dashboard' },
-    { title: 'Transações', icon: 'swap-horizontal-outline', screen: 'Transfers' },
+    { title: 'Transações', icon: 'swap-horizontal-outline', screen: 'Transactions' },
     { title: 'Investimentos', icon: 'trending-up-outline', screen: 'Investments' },
     { title: 'Outros Serviços', icon: 'grid-outline', screen: 'Services' },
   ];

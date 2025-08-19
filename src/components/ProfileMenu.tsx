@@ -1,19 +1,20 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../contexts/AuthContext';
 import { colors } from '../constants/colors';
 
 interface ProfileMenuProps {
   visible: boolean;
-  onLogout: () => void;
 }
 
-export default function ProfileMenu({ visible, onLogout }: ProfileMenuProps) {
+export default function ProfileMenu({ visible }: ProfileMenuProps) {
+  const { logout } = useAuth();
   if (!visible) return null;
 
   return (
     <View style={styles.profileMenu}>
-      <TouchableOpacity style={styles.logoutButton} onPress={onLogout}>
+      <TouchableOpacity style={styles.logoutButton} onPress={logout}>
         <Ionicons name="log-out-outline" size={20} color={colors.white} />
         <Text style={styles.logoutText}>Sair</Text>
       </TouchableOpacity>

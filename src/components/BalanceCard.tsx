@@ -1,10 +1,25 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../contexts/AuthContext';
+import { useTransactions } from '../contexts/TransactionsContext';
 import { colors } from '../constants/colors';
 
 export default function BalanceCard() {
+  const { userProfile } = useAuth();
+  const { transactions } = useTransactions();
   const [isBalanceVisible, setIsBalanceVisible] = useState(true);
+  
+  const currentBalance = transactions.reduce((sum, transaction) => {
+    return sum + transaction.amount;
+  }, 0);
+  
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
 
   const getCurrentDate = () => {
     const now = new Date();
@@ -18,7 +33,9 @@ export default function BalanceCard() {
 
   return (
     <View style={styles.balanceCard}>
-      <Text style={styles.greeting}>Olá, Joana! :)</Text>
+      <Text style={styles.greeting}>
+        Olá, {userProfile?.firstName ? `${userProfile.firstName}!` : 'Usuário!'} :)
+      </Text>
       <Text style={styles.date}>{getCurrentDate()}</Text>
       
       <View style={styles.balanceSection}>
@@ -34,7 +51,7 @@ export default function BalanceCard() {
         </View>
         <Text style={styles.accountType}>Conta Corrente</Text>
         <Text style={styles.balanceAmount}>
-          {isBalanceVisible ? "R$ 2.500,00" : "R$ ••••••"}
+          {isBalanceVisible ? formatCurrency(currentBalance) : "R$ ••••••"}
         </Text>
       </View>
     </View>

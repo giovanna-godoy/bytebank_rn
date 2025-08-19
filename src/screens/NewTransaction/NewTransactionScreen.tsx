@@ -52,7 +52,7 @@ export default function NewTransactionScreen() {
     setErrors(prev => ({ ...prev, description: error }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const amountError = validateAmount(amount);
     const descriptionError = validateDescription(description);
     
@@ -70,17 +70,20 @@ export default function NewTransactionScreen() {
         receipt,
       };
       
-      if (transaction) {
-        updateTransaction(transaction.id, transactionData);
-      } else {
-        addTransaction(transactionData);
+      try {
+        if (transaction) {
+          await updateTransaction(transaction.id, transactionData);
+        } else {
+          await addTransaction(transactionData);
+        }
+        navigation.goBack();
+      } catch (error) {
+        console.error('Erro ao salvar transação:', error);
       }
-      
-      navigation.goBack();
     }
   };
 
-  const isFormValid = !errors.amount && !errors.description && amount && description;
+  const isFormValid = amount.trim() !== '' && description.trim() !== '' && !errors.amount && !errors.description;
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({

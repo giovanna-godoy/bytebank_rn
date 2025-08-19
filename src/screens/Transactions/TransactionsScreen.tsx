@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -15,85 +15,66 @@ type TransactionsScreenNavigationProp = StackNavigationProp<RootStackParamList, 
 
 export default function TransactionsScreen() {
   const navigation = useNavigation<TransactionsScreenNavigationProp>();
-  const { transactions, deleteTransaction } = useTransactions();
+  const { transactions, loading, loadingMore, hasMore, deleteTransaction, loadMoreTransactions } = useTransactions();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showSideMenu, setShowSideMenu] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState<string>('Todos');
   const [selectedType, setSelectedType] = useState<string>('Todos');
 
-  const generateMoreTransactions = useCallback(() => {
-    const types: Transaction['type'][] = ['Depósito', 'Saque', 'Transferência'];
-    const months = ['Setembro', 'Agosto', 'Julho', 'Junho', 'Maio'];
-    const newTransactions: Transaction[] = [];
-    
-    for (let i = 0; i < 10; i++) {
-      const randomType = types[Math.floor(Math.random() * types.length)];
-      const randomAmount = randomType === 'Depósito' 
-        ? Math.floor(Math.random() * 500) + 50
-        : -(Math.floor(Math.random() * 300) + 20);
-      const randomMonth = months[Math.floor(Math.random() * months.length)];
-      const randomDay = Math.floor(Math.random() * 28) + 1;
-      
-      newTransactions.push({
-        id: `${transactions.length + i + 1}`,
-        type: randomType,
-        amount: randomAmount,
-        date: `${randomDay.toString().padStart(2, '0')}/10/2022`,
-        month: randomMonth,
-      });
-    }
-    
-    return newTransactions;
-  }, [transactions.length]);
 
-  const loadMoreTransactions = useCallback(() => {
-    if (loading) return;
-    
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-  }, [loading]);
 
-  const filteredTransactions = transactions.filter(transaction => {
-    const monthMatch = selectedMonth === 'Todos' || transaction.month === selectedMonth;
-    const typeMatch = selectedType === 'Todos' || transaction.type === selectedType;
-    return monthMatch && typeMatch;
-  });
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter(transaction => {
+      const monthMatch = selectedMonth === 'Todos' || transaction.month === selectedMonth;
+      const typeMatch = selectedType === 'Todos' || transaction.type === selectedType;
+      return monthMatch && typeMatch;
+    });
+  }, [transactions, selectedMonth, selectedType]);
 
-  const handleEditTransaction = (id: string) => {
+  const handleEditTransaction = useCallback((id: string) => {
     const transaction = transactions.find(t => t.id === id);
     if (transaction) {
       navigation.navigate('NewTransaction', { transaction });
     }
-  };
+  }, [transactions, navigation]);
 
-  const handleDeleteTransaction = (id: string) => {
-    deleteTransaction(id);
-  };
+  const handleDeleteTransaction = useCallback(async (id: string) => {
+    try {
+      await deleteTransaction(id);
+    } catch (error) {
+      console.error('Erro no handleDeleteTransaction:', error);
+    }
+  }, [deleteTransaction]);
 
-  const flatListData = filteredTransactions.map((transaction, index) => {
-    const isFirstInMonth = index === 0 || filteredTransactions[index - 1].month !== transaction.month;
-    return { ...transaction, showMonthHeader: isFirstInMonth };
-  });
+  const flatListData = useMemo(() => {
+    return filteredTransactions.map((transaction, index) => {
+      const isFirstInMonth = index === 0 || filteredTransactions[index - 1].month !== transaction.month;
+      return { ...transaction, showMonthHeader: isFirstInMonth };
+    });
+  }, [filteredTransactions]);
 
-  const renderTransaction = ({ item }: { item: Transaction & { showMonthHeader: boolean } }) => (
+  const renderTransaction = useCallback(({ item }: { item: Transaction & { showMonthHeader: boolean } }) => (
     <SwipeableTransaction
       item={item}
       onEdit={handleEditTransaction}
       onDelete={handleDeleteTransaction}
     />
-  );
+  ), [handleEditTransaction, handleDeleteTransaction]);
 
   const renderFooter = () => {
-    if (!loading) return null;
+    if (!loadingMore) return null;
     return (
       <View style={styles.loadingFooter}>
         <ActivityIndicator size="small" color={colors.primary} />
       </View>
     );
   };
+
+  const handleEndReached = useCallback(() => {
+    if (hasMore && !loadingMore) {
+      loadMoreTransactions();
+    }
+  }, [hasMore, loadingMore, loadMoreTransactions]);
 
   return (
     <View style={styles.container}>
@@ -110,10 +91,6 @@ export default function TransactionsScreen() {
       
       <ProfileMenu 
         visible={showProfileMenu}
-        onLogout={() => {
-          setShowProfileMenu(false);
-          console.log('Logout');
-        }}
       />
       
       <View style={styles.content}>
@@ -171,11 +148,14 @@ export default function TransactionsScreen() {
           data={flatListData}
           renderItem={renderTransaction}
           keyExtractor={(item) => item.id}
-          onEndReached={loadMoreTransactions}
-          onEndReachedThreshold={0.1}
           ListFooterComponent={renderFooter}
           showsVerticalScrollIndicator={false}
           style={styles.list}
+          onEndReached={handleEndReached}
+          onEndReachedThreshold={0.1}
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={10}
+          windowSize={10}
         />
       </View>
       

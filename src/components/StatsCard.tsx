@@ -1,12 +1,12 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { colors } from '../constants/colors';
 
-export default function StatsCard() {
+const StatsCard = React.memo(() => {
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
+  const startAnimation = useCallback(() => {
     Animated.sequence([
       Animated.timing(scaleAnim, {
         toValue: 1,
@@ -19,7 +19,11 @@ export default function StatsCard() {
         useNativeDriver: true,
       }),
     ]).start();
-  }, []);
+  }, [scaleAnim, rotateAnim]);
+
+  useEffect(() => {
+    startAnimation();
+  }, [startAnimation]);
 
   const spin = rotateAnim.interpolate({
     inputRange: [0, 1],
@@ -63,7 +67,9 @@ export default function StatsCard() {
       </View>
     </View>
   );
-}
+});
+
+export default StatsCard;
 
 const styles = StyleSheet.create({
   statsCard: {

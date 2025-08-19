@@ -18,7 +18,7 @@ interface SwipeableTransactionProps {
   onDelete: (id: string) => void;
 }
 
-export default function SwipeableTransaction({ item, onEdit, onDelete }: SwipeableTransactionProps) {
+const SwipeableTransaction = React.memo(({ item, onEdit, onDelete }: SwipeableTransactionProps) => {
   const translateX = new Animated.Value(0);
   const [isSwipeOpen, setIsSwipeOpen] = React.useState(false);
 
@@ -105,7 +105,9 @@ export default function SwipeableTransaction({ item, onEdit, onDelete }: Swipeab
       </View>
     </View>
   );
-}
+});
+
+export default SwipeableTransaction;
 
 const styles = StyleSheet.create({
   container: {

@@ -1,26 +1,53 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTransactions } from '../contexts/TransactionsContext';
+import { useCurrencyFormatter } from '../hooks/useCurrencyFormatter';
 import { colors } from '../constants/colors';
 
-export default function InvestmentCard() {
+const InvestmentCard = React.memo(() => {
+  const { transactions } = useTransactions();
+  
+  const investmentData = useMemo(() => {
+    const totalDeposits = transactions
+      .filter(t => t.type === 'Depósito')
+      .reduce((sum, t) => sum + t.amount, 0);
+    
+    const totalWithdrawals = Math.abs(transactions
+      .filter(t => t.type === 'Saque' || t.type === 'Transferência')
+      .reduce((sum, t) => sum + t.amount, 0));
+    
+    const availableBalance = totalDeposits - totalWithdrawals;
+    const rendaFixa = Math.round(availableBalance * 0.7);
+    const rendaVariavel = Math.round(availableBalance * 0.3);
+    const totalInvestments = rendaFixa + rendaVariavel;
+    
+    return { rendaFixa, rendaVariavel, totalInvestments };
+  }, [transactions]);
+  
+  const { formatCurrency } = useCurrencyFormatter();
+
   return (
     <View style={styles.investmentCard}>
       <Text style={styles.sectionTitle}>Investimentos</Text>
-      <Text style={styles.investmentTotal}>Total: R$ 50.000,00</Text>
+      <Text style={styles.investmentTotal}>
+        Total: {formatCurrency(investmentData.totalInvestments)}
+      </Text>
       
       <View style={styles.investmentItems}>
         <View style={styles.investmentItem}>
           <Text style={styles.investmentType}>Renda Fixa</Text>
-          <Text style={styles.investmentValue}>R$ 36.000,00</Text>
+          <Text style={styles.investmentValue}>{formatCurrency(investmentData.rendaFixa)}</Text>
         </View>
         <View style={styles.investmentItem}>
-          <Text style={styles.investmentType}>Renda variável</Text>
-          <Text style={styles.investmentValue}>R$ 14.000,00</Text>
+          <Text style={styles.investmentType}>Renda Variável</Text>
+          <Text style={styles.investmentValue}>{formatCurrency(investmentData.rendaVariavel)}</Text>
         </View>
       </View>
     </View>
   );
-}
+});
+
+export default InvestmentCard;
 
 const styles = StyleSheet.create({
   investmentCard: {

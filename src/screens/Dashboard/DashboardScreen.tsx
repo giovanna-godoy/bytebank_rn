@@ -84,10 +84,6 @@ export default function DashboardScreen() {
       
       <ProfileMenu 
         visible={showProfileMenu}
-        onLogout={() => {
-          setShowProfileMenu(false);
-          console.log('Logout');
-        }}
       />
       
       <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>

@@ -83,7 +83,7 @@ const StatsCard = React.memo(() => {
 
   return (
     <View style={styles.statsCard}>
-      <Text style={styles.sectionTitle}>Estatísticas</Text>
+      <Text style={styles.sectionTitle}>Visão Geral</Text>
       
       <View style={styles.chartContainer}>
         <Animated.View style={[

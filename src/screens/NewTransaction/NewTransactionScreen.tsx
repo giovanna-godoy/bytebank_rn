@@ -8,6 +8,9 @@ import * as DocumentPicker from 'expo-document-picker';
 import { colors } from '../../constants/colors';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { useTransactions } from '../../contexts/TransactionsContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { uploadReceipt } from '../../services/storage/receiptService';
+import ReceiptViewer from '../../components/ReceiptViewer';
 
 type NewTransactionScreenNavigationProp = StackNavigationProp<RootStackParamList, 'NewTransaction'>;
 type NewTransactionScreenRouteProp = RouteProp<RootStackParamList, 'NewTransaction'>;
@@ -16,6 +19,7 @@ export default function NewTransactionScreen() {
   const navigation = useNavigation<NewTransactionScreenNavigationProp>();
   const route = useRoute<NewTransactionScreenRouteProp>();
   const { addTransaction, updateTransaction } = useTransactions();
+  const { user } = useAuth();
   const { transaction } = route.params || {};
   
   const [selectedType, setSelectedType] = useState<'Depósito' | 'Saque' | 'Transferência'>(transaction?.type || 'Depósito');
@@ -23,6 +27,7 @@ export default function NewTransactionScreen() {
   const [description, setDescription] = useState(transaction?.type || '');
   const [receipt, setReceipt] = useState<string | undefined>(transaction?.receipt);
   const [errors, setErrors] = useState<{amount?: string; description?: string}>({});
+  const [uploading, setUploading] = useState(false);
 
   const validateAmount = (value: string): string | undefined => {
     if (!value.trim()) return 'Valor é obrigatório';
@@ -59,18 +64,25 @@ export default function NewTransactionScreen() {
     setErrors({ amount: amountError, description: descriptionError });
     
     if (!amountError && !descriptionError) {
-      const numAmount = parseFloat(amount.replace(',', '.'));
-      const finalAmount = selectedType === 'Depósito' ? numAmount : -numAmount;
-      
-      const transactionData = {
-        type: selectedType,
-        amount: finalAmount,
-        date: new Date().toLocaleDateString('pt-BR'),
-        month: new Date().toLocaleDateString('pt-BR', { month: 'long' }),
-        receipt,
-      };
-      
+      setUploading(true);
       try {
+        const numAmount = parseFloat(amount.replace(',', '.'));
+        const finalAmount = selectedType === 'Depósito' ? numAmount : -numAmount;
+        
+        let receiptUrl = receipt;
+        
+        if (receipt && receipt.startsWith('file://') && user) {
+          receiptUrl = await uploadReceipt(receipt, user.uid);
+        }
+        
+        const transactionData = {
+          type: selectedType,
+          amount: finalAmount,
+          date: new Date().toLocaleDateString('pt-BR'),
+          month: new Date().toLocaleDateString('pt-BR', { month: 'long' }),
+          receipt: receiptUrl,
+        };
+        
         if (transaction) {
           await updateTransaction(transaction.id, transactionData);
         } else {
@@ -79,11 +91,14 @@ export default function NewTransactionScreen() {
         navigation.goBack();
       } catch (error) {
         console.error('Erro ao salvar transação:', error);
+        Alert.alert('Erro', 'Não foi possível salvar a transação');
+      } finally {
+        setUploading(false);
       }
     }
   };
 
-  const isFormValid = amount.trim() !== '' && description.trim() !== '' && !errors.amount && !errors.description;
+  const isFormValid = amount.trim() !== '' && description.trim() !== '' && !errors.amount && !errors.description && !uploading;
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -186,15 +201,11 @@ export default function NewTransactionScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Recibo (Opcional)</Text>
           {receipt ? (
-            <View style={styles.receiptContainer}>
-              <Image source={{ uri: receipt }} style={styles.receiptImage} />
-              <TouchableOpacity 
-                style={styles.removeReceiptButton}
-                onPress={() => setReceipt(undefined)}
-              >
-                <Ionicons name="close-circle" size={24} color="#EF4444" />
-              </TouchableOpacity>
-            </View>
+            <ReceiptViewer 
+              receiptUrl={receipt} 
+              onRemove={() => setReceipt(undefined)}
+              showRemoveButton={true}
+            />
           ) : (
             <TouchableOpacity style={styles.uploadButton} onPress={showUploadOptions}>
               <Ionicons name="camera" size={24} color={colors.primary} />
@@ -209,7 +220,7 @@ export default function NewTransactionScreen() {
           disabled={!isFormValid}
         >
           <Text style={[styles.saveButtonText, !isFormValid && styles.saveButtonTextDisabled]}>
-            {transaction ? 'Atualizar Transação' : 'Salvar Transação'}
+            {uploading ? 'Salvando...' : (transaction ? 'Atualizar Transação' : 'Salvar Transação')}
           </Text>
         </TouchableOpacity>
       </ScrollView>
@@ -325,21 +336,5 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: '500',
   },
-  receiptContainer: {
-    position: 'relative',
-    alignItems: 'center',
-  },
-  receiptImage: {
-    width: '100%',
-    height: 200,
-    borderRadius: 8,
-    backgroundColor: colors.gray.light,
-  },
-  removeReceiptButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: colors.white,
-    borderRadius: 12,
-  },
+
 });

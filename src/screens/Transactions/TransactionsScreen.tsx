@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { colors } from '../../constants/colors';
@@ -30,6 +30,8 @@ export default function TransactionsScreen() {
     { id: '5', type: 'Transferência', amount: -250, date: '10/10/2022', month: 'Outubro' },
   ]);
   const [loading, setLoading] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState<string>('Todos');
+  const [selectedType, setSelectedType] = useState<string>('Todos');
 
   const generateMoreTransactions = useCallback(() => {
     const types: Transaction['type'][] = ['Depósito', 'Saque', 'Transferência'];
@@ -67,8 +69,14 @@ export default function TransactionsScreen() {
     }, 1000);
   }, [loading, generateMoreTransactions]);
 
-  const flatListData = transactions.map((transaction, index) => {
-    const isFirstInMonth = index === 0 || transactions[index - 1].month !== transaction.month;
+  const filteredTransactions = transactions.filter(transaction => {
+    const monthMatch = selectedMonth === 'Todos' || transaction.month === selectedMonth;
+    const typeMatch = selectedType === 'Todos' || transaction.type === selectedType;
+    return monthMatch && typeMatch;
+  });
+
+  const flatListData = filteredTransactions.map((transaction, index) => {
+    const isFirstInMonth = index === 0 || filteredTransactions[index - 1].month !== transaction.month;
     return { ...transaction, showMonthHeader: isFirstInMonth };
   });
 
@@ -122,17 +130,68 @@ export default function TransactionsScreen() {
         }}
       />
       
-      <FlatList
-        style={styles.content}
-        data={flatListData}
-        renderItem={renderTransaction}
-        keyExtractor={(item) => item.id}
-        onEndReached={loadMoreTransactions}
-        onEndReachedThreshold={0.1}
-        ListFooterComponent={renderFooter}
-        ListHeaderComponent={<Text style={styles.title}>Extrato</Text>}
-        showsVerticalScrollIndicator={false}
-      />
+      <View style={styles.content}>
+        <Text style={styles.title}>Extrato</Text>
+        
+        <View style={styles.filtersContainer}>
+          <View style={styles.filterRow}>
+            <Text style={styles.filterLabel}>Mês:</Text>
+            <View style={styles.filterButtons}>
+              {['Todos', 'Novembro', 'Outubro'].map((month) => (
+                <TouchableOpacity
+                  key={month}
+                  style={[
+                    styles.filterButton,
+                    selectedMonth === month && styles.filterButtonActive
+                  ]}
+                  onPress={() => setSelectedMonth(month)}
+                >
+                  <Text style={[
+                    styles.filterButtonText,
+                    selectedMonth === month && styles.filterButtonTextActive
+                  ]}>
+                    {month}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+          
+          <View style={styles.filterRow}>
+            <Text style={styles.filterLabel}>Tipo:</Text>
+            <View style={styles.filterButtons}>
+              {['Todos', 'Depósito', 'Saque', 'Transferência'].map((type) => (
+                <TouchableOpacity
+                  key={type}
+                  style={[
+                    styles.filterButton,
+                    selectedType === type && styles.filterButtonActive
+                  ]}
+                  onPress={() => setSelectedType(type)}
+                >
+                  <Text style={[
+                    styles.filterButtonText,
+                    selectedType === type && styles.filterButtonTextActive
+                  ]}>
+                    {type}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </View>
+        
+        <FlatList
+          data={flatListData}
+          renderItem={renderTransaction}
+          keyExtractor={(item) => item.id}
+          onEndReached={loadMoreTransactions}
+          onEndReachedThreshold={0.1}
+          ListFooterComponent={renderFooter}
+          showsVerticalScrollIndicator={false}
+          style={styles.list}
+        />
+      </View>
     </View>
   );
 }
@@ -143,8 +202,48 @@ const styles = StyleSheet.create({
     backgroundColor: colors.gray.light,
   },
   content: {
+    flex: 1,
     paddingTop: 120,
     paddingHorizontal: 20,
+  },
+  filtersContainer: {
+    marginBottom: 20,
+  },
+  filterRow: {
+    marginBottom: 12,
+  },
+  filterLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.gray.dark,
+    marginBottom: 8,
+  },
+  filterButtons: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  filterButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: colors.gray.medium,
+    borderWidth: 1,
+    borderColor: colors.gray.medium,
+  },
+  filterButtonActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  filterButtonText: {
+    fontSize: 12,
+    color: colors.gray.dark,
+  },
+  filterButtonTextActive: {
+    color: colors.white,
+  },
+  list: {
+    flex: 1,
   },
   title: {
     fontSize: 24,

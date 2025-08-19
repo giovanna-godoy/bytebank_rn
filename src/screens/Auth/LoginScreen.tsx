@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { auth } from '../../config/firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import { colors } from '../../constants/colors';
 
@@ -22,6 +24,23 @@ export default function LoginScreen({ navigation }: any) {
       Alert.alert('Erro', 'Email ou senha incorretos');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      Alert.alert('Email necessário', 'Digite seu email para recuperar a senha');
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      Alert.alert(
+        'Email enviado!', 
+        'Verifique sua caixa de entrada para redefinir sua senha'
+      );
+    } catch (error: any) {
+      Alert.alert('Erro', 'Não foi possível enviar o email de recuperação');
     }
   };
 
@@ -58,6 +77,13 @@ export default function LoginScreen({ navigation }: any) {
           <Text style={styles.buttonText}>
             {loading ? 'Entrando...' : 'Entrar'}
           </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.linkButton}
+          onPress={handleForgotPassword}
+        >
+          <Text style={styles.linkText}>Esqueci minha senha</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 

@@ -21,11 +21,26 @@ export default function TransactionsScreen() {
   const [selectedMonth, setSelectedMonth] = useState<string>('Todos');
   const [selectedType, setSelectedType] = useState<string>('Todos');
 
+  const getLastThreeMonths = useMemo(() => {
+    const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    const currentDate = new Date();
+    const result = ['Todos'];
+    
+    for (let i = 0; i < 3; i++) {
+      const monthIndex = (currentDate.getMonth() - i + 12) % 12;
+      result.push(months[monthIndex]);
+    }
+    
+    return result;
+  }, []);
+
 
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter(transaction => {
-      const monthMatch = selectedMonth === 'Todos' || transaction.month === selectedMonth;
+      const monthMatch = selectedMonth === 'Todos' || 
+                        transaction.month?.toLowerCase() === selectedMonth.toLowerCase();
       const typeMatch = selectedType === 'Todos' || transaction.type === selectedType;
       return monthMatch && typeMatch;
     });
@@ -100,7 +115,7 @@ export default function TransactionsScreen() {
           <View style={styles.filterRow}>
             <Text style={styles.filterLabel}>Mês:</Text>
             <View style={styles.filterButtons}>
-              {['Todos', 'Novembro', 'Outubro'].map((month) => (
+              {getLastThreeMonths.map((month) => (
                 <TouchableOpacity
                   key={month}
                   style={[

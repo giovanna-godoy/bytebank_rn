@@ -101,15 +101,20 @@ export default function NewTransactionScreen() {
   const isFormValid = amount.trim() !== '' && description.trim() !== '' && !errors.amount && !errors.description && !uploading;
 
   const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.8,
-    });
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
 
-    if (!result.canceled) {
-      setReceipt(result.assets[0].uri);
+      if (!result.canceled && result.assets && result.assets[0]) {
+        setReceipt(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Erro ao selecionar imagem:', error);
+      Alert.alert('Erro', 'Não foi possível abrir a galeria');
     }
   };
 

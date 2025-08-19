@@ -23,6 +23,7 @@ interface TransactionsContextData {
   updateTransaction: (id: string, transaction: Omit<Transaction, 'id'>) => Promise<void>;
   deleteTransaction: (id: string) => Promise<void>;
   loadMoreTransactions: () => Promise<void>;
+  refreshTransactions: () => Promise<void>;
 }
 
 const TransactionsContext = createContext<TransactionsContextData>({} as TransactionsContextData);
@@ -118,6 +119,8 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
       userId: user.uid,
       createdAt: new Date(),
     });
+    
+    await refreshTransactions();
   };
 
   const updateTransaction = async (id: string, updatedTransaction: Omit<Transaction, 'id'>) => {
@@ -126,13 +129,40 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
     );
     
     await updateDoc(doc(db, 'transactions', id), cleanTransaction);
+    await refreshTransactions();
   };
 
   const deleteTransaction = async (id: string) => {
     try {
       await deleteDoc(doc(db, 'transactions', id));
+      await refreshTransactions();
     } catch (error) {
       console.error('Erro ao deletar transação:', error);
+    }
+  };
+
+  const refreshTransactions = async () => {
+    if (!user) return;
+    
+    try {
+      const q = query(
+        collection(db, 'transactions'),
+        where('userId', '==', user.uid),
+        orderBy('createdAt', 'desc'),
+        limit(TRANSACTIONS_PER_PAGE)
+      );
+
+      const snapshot = await getDocs(q);
+      const transactionsData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Transaction[];
+      
+      setTransactions(transactionsData);
+      setLastDoc(snapshot.docs[snapshot.docs.length - 1] || null);
+      setHasMore(snapshot.docs.length === TRANSACTIONS_PER_PAGE);
+    } catch (error) {
+      console.error('Erro ao atualizar transações:', error);
     }
   };
 
@@ -146,6 +176,7 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
       updateTransaction,
       deleteTransaction,
       loadMoreTransactions,
+      refreshTransactions,
     }}>
       {children}
     </TransactionsContext.Provider>

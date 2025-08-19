@@ -7,6 +7,7 @@ export interface Transaction {
   id: string;
   type: 'Depósito' | 'Saque' | 'Transferência';
   amount: number;
+  description: string;
   date: string;
   month: string;
   receipt?: string;

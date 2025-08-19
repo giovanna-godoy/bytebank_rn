@@ -24,7 +24,7 @@ export default function NewTransactionScreen() {
   
   const [selectedType, setSelectedType] = useState<'Depósito' | 'Saque' | 'Transferência'>(transaction?.type || 'Depósito');
   const [amount, setAmount] = useState(transaction ? Math.abs(transaction.amount).toString() : '');
-  const [description, setDescription] = useState(transaction?.type || '');
+  const [description, setDescription] = useState(transaction?.description || '');
   const [receipt, setReceipt] = useState<string | undefined>(transaction?.receipt);
   const [errors, setErrors] = useState<{amount?: string; description?: string}>({});
   const [uploading, setUploading] = useState(false);
@@ -78,6 +78,7 @@ export default function NewTransactionScreen() {
         const transactionData = {
           type: selectedType,
           amount: finalAmount,
+          description: description,
           date: new Date().toLocaleDateString('pt-BR'),
           month: new Date().toLocaleDateString('pt-BR', { month: 'long' }),
           receipt: receiptUrl,

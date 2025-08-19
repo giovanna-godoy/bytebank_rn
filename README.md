@@ -32,49 +32,18 @@ Aplicação React Native desenvolvida com Expo para gerenciamento completo de tr
 - **Expo ImagePicker** e **DocumentPicker** para upload de arquivos
 - **Animated API** para animações nativas
 
-## 📋 Pré-requisitos
+## Pré-requisitos
 
 - Node.js (versão 16 ou superior)
 - npm ou yarn
 - Expo CLI
-- Conta no Firebase
 - Dispositivo físico ou emulador Android/iOS
-
-## ⚙️ Configuração do Firebase
-
-### 1. Criar Projeto no Firebase
-1. Acesse [Firebase Console](https://console.firebase.google.com/)
-2. Clique em "Criar um projeto"
-3. Siga as instruções para criar o projeto
-
-### 2. Configurar Authentication
-1. No console do Firebase, vá em **Authentication**
-2. Clique em **Começar**
-3. Na aba **Sign-in method**, habilite:
-   - **Email/senha**
-
-### 3. Configurar Firestore Database
-1. Vá em **Firestore Database**
-2. Clique em **Criar banco de dados**
-3. Escolha **Iniciar no modo de teste**
-4. Selecione uma localização próxima
-
-### 4. Configurar Storage
-1. Vá em **Storage**
-2. Clique em **Começar**
-3. Aceite as regras padrão
-
-### 5. Obter Configurações
-1. Vá em **Configurações do projeto** (ícone de engrenagem)
-2. Na seção **Seus aplicativos**, clique em **Adicionar app** > **Web**
-3. Registre o app com um nome
-4. Copie as configurações do Firebase
 
 ## Instalação e Configuração
 
 ### 1. Clonar o Repositório
 ```bash
-git clone <url-do-repositorio>
+git clone https://github.com/giovanna-godoy/bytebank_rn
 cd bytebank_rn
 ```
 
@@ -127,6 +96,6 @@ npx expo start --ios
 
 ## Vídeo da aplicação
 
-* Anexado no zip :)
+* Link anexado no zip :)
 
 © 2025 Bytebank. Todos os direitos reservados. - Feito por Giovanna G. Lorente

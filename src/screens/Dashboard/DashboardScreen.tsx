@@ -8,7 +8,6 @@ import Header from '../../components/Header';
 import ProfileMenu from '../../components/ProfileMenu';
 import SideMenu from '../../components/SideMenu';
 import BalanceCard from '../../components/BalanceCard';
-import InvestmentCard from '../../components/InvestmentCard';
 import StatsCard from '../../components/StatsCard';
 
 const { width } = Dimensions.get('window');
@@ -21,11 +20,9 @@ export default function DashboardScreen() {
   const [showSideMenu, setShowSideMenu] = useState(false);
   
   const balanceAnim = useRef(new Animated.Value(0)).current;
-  const investmentAnim = useRef(new Animated.Value(0)).current;
   const statsAnim = useRef(new Animated.Value(0)).current;
   
   const balanceSlide = useRef(new Animated.Value(50)).current;
-  const investmentSlide = useRef(new Animated.Value(50)).current;
   const statsSlide = useRef(new Animated.Value(50)).current;
 
   useEffect(() => {
@@ -37,18 +34,6 @@ export default function DashboardScreen() {
           useNativeDriver: true,
         }),
         Animated.timing(balanceSlide, {
-          toValue: 0,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-      ]),
-      Animated.parallel([
-        Animated.timing(investmentAnim, {
-          toValue: 1,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-        Animated.timing(investmentSlide, {
           toValue: 0,
           duration: 600,
           useNativeDriver: true,
@@ -92,13 +77,6 @@ export default function DashboardScreen() {
           transform: [{ translateY: balanceSlide }]
         }}>
           <BalanceCard />
-        </Animated.View>
-        
-        <Animated.View style={{
-          opacity: investmentAnim,
-          transform: [{ translateY: investmentSlide }]
-        }}>
-          <InvestmentCard />
         </Animated.View>
         
         <Animated.View style={{
